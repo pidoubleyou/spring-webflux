@@ -76,15 +76,26 @@ zwei Bibliotheken auf Basis <span class="color-highlight">Project Reactor</span>
 
 ![image](./resources/spring_stack.png)
 
-<--->
+<-->
 
-### Was sind Mono und Flux
+### Spring Webflux Programmiermodelle
 
-* <span class="color-important">Mono</span>: Stream, der nur ein Ergebnis liefert
+
+* <span class="color-highlight">Annotation-based</span> reactive components
+
+  * ähnlich Spring Web
+
+* <span class="color-highlight">Functional</span> routing and handling
+
+<-->
+
+### Mono und Flux
+
+* <span class="color-important">Mono</span>: Stream, der nur <span class="color-highlight">ein</span> Ergebnis liefert
   * ein Wert + Complete
   * Fehler
 
-* <span class="color-important">Flux</span>: Stream, der 0-n Ergebnisse liefert
+* <span class="color-important">Flux</span>: Stream, der <span class="color-highlight">0-n</span> Ergebnisse liefert
   * 0-n Werte + Complete
   * 0-n Werte + Fehler 
 
