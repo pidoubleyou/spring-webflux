@@ -1,14 +1,14 @@
 package webflux.sample.api.handler;
 
-import webflux.sample.api.model.Mapper;
-import webflux.sample.api.model.Ticket;
-import webflux.sample.repository.TicketRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import webflux.sample.api.model.Mapper;
+import webflux.sample.api.model.Ticket;
+import webflux.sample.repository.TicketRepository;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.web.reactive.function.BodyInserters.fromValue;
@@ -25,13 +25,12 @@ public class TicketHandler {
     return request.bodyToMono(Ticket.class)
       .flatMap(this::setId)
       .map(Mapper::map)
-      .doOnNext(ticketRepository::save)
+      .flatMap(ticketRepository::save)
       .map(Mapper::map)
       .flatMap(
         ticket ->
           ServerResponse.created(
-            UriComponentsBuilder.fromPath("ticket/" + ticket.getId()).build().toUri())
-            .build());
+            UriComponentsBuilder.fromPath("ticket/" + ticket.getId()).build().toUri()).contentType(APPLICATION_JSON).body(fromValue(ticket)));
   }
 
   private Mono<Ticket> setId(Ticket ticket) {

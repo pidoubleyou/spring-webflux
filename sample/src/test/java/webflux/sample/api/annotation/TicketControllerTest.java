@@ -33,6 +33,7 @@ class TicketControllerTest {
     TicketEntity createdTicketEntity = TicketEntity.builder().id(9L).title("test").description("some description").build();
 
     Mockito.when(repository.count()).thenReturn(Mono.just(9L));
+    Mockito.when(repository.save(createdTicketEntity)).thenReturn(Mono.just(createdTicketEntity));
 
     webClient
       .post()

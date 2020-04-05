@@ -34,7 +34,7 @@ public class TicketController {
     return ticket
       .flatMap(this::setId)
       .map(Mapper::map)
-      .doOnNext(ticketRepository::save)
+      .flatMap(ticketRepository::save)
       .map(Mapper::map);
   }
 
