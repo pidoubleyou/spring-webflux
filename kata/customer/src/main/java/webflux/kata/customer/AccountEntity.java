@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 public class AccountEntity {
   @Id
-  private long id;
+  private Long id;
   private String number;
   private String description;
 }
