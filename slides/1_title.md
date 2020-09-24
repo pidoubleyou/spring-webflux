@@ -1,4 +1,4 @@
-# Einführung Spring Webflux
+# Einführung Spring Reactive
 
 - <i class="fa fa-user"></i>&nbsp;Peter Wagner
-- <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;03.04.2020
+- <i class="fa fa-calendar" aria-hidden="true"></i>&nbsp;24.09.2020

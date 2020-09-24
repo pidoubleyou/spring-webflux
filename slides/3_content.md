@@ -64,11 +64,13 @@ und nicht Zeitverhalten
 
 ### Was bietet Spring
 
-zwei Bibliotheken auf Basis <span class="color-highlight">Project Reactor</span> 
+Bibliotheken auf Basis <span class="color-highlight">Project Reactor</span> 
 
-* Spring Webflux 
+* Spring Reactive Web 
 
 * Spring Cloud Gateway
+
+* Spring Cloud Function/Stream
 
 <-->
 
@@ -76,18 +78,7 @@ zwei Bibliotheken auf Basis <span class="color-highlight">Project Reactor</span>
 
 ![image](./resources/spring_stack.png)
 
-<-->
-
-### Spring Webflux Programmiermodelle
-
-
-* <span class="color-highlight">Annotation-based</span> reactive components
-
-  * ähnlich Spring Web
-
-* <span class="color-highlight">Functional</span> routing and handling
-
-<-->
+<--->
 
 ### Mono und Flux
 
@@ -99,9 +90,129 @@ zwei Bibliotheken auf Basis <span class="color-highlight">Project Reactor</span>
   * 0-n Werte + Complete
   * 0-n Werte + Fehler 
 
-<--->
+<-->
 
 ### Codebeispiel
+
+<pre><code data-trim data-noescape>
+Mono.just(10L)
+      .flatMap(ticketRepository::findById)
+      .switchIfEmpty(Mono.error(NotFoundException::new))
+      .filter(entry -> entry.getId() > 10)
+      .map(entry -> entry.getId() + " " + entry.getTitle());
+
+</code></pre>
+
+<--->
+
+### reaktive REST-API
+
+
+* <span class="color-highlight">Annotation-based</span> reactive components
+
+  * ähnlich Spring Web
+
+* <span class="color-highlight">Functional</span> routing and handling
+
+<-->
+
+### Codebeispiel - Annotation Based
+
+<pre><code data-trim data-noescape>
+@PostMapping()
+@ResponseStatus(HttpStatus.CREATED)
+public Mono&lt;Ticket> createTicket(@RequestBody Mono&lt;Ticket> ticket) {
+  return ticket
+    .flatMap(this::setId)
+    .map(Mapper::map)
+    .flatMap(ticketRepository::save)
+    .map(Mapper::map);
+}
+
+</code></pre>
+
+<-->
+
+### Codebeispiel - Functional routing and handling
+
+#### Routing
+
+<pre><code data-trim data-noescape>
+@Bean
+  public RouterFunction&lt;ServerResponse> route() {
+    TicketHandler handler = new TicketHandler(ticketRepository);
+    return RouterFunctions.route(POST("/v2/tickets")
+        .and(contentType(APPLICATION_JSON)), handler::createTicket)
+        .andRoute(GET("/v2/tickets")
+        .and(accept(APPLICATION_STREAM_JSON)),
+      handler::getTickets);
+  }
+</code></pre>
+
+<-->
+
+### Codebeispiel - Functional routing and handling
+
+#### Handler
+
+<pre><code data-trim data-noescape>
+public Mono<ServerResponse> createTicket(ServerRequest request) {
+    return request.bodyToMono(Ticket.class)
+      .flatMap(this::setId)
+      .map(Mapper::map)
+      .flatMap(ticketRepository::save)
+      .map(Mapper::map)
+      .flatMap(
+        ticket ->
+          ServerResponse.created(
+            UriComponentsBuilder
+              .fromPath("ticket/" + ticket.getId())
+              .build()
+              .toUri())
+              .contentType(APPLICATION_JSON)
+              .body(fromValue(ticket)));
+}
+</code></pre>
+
+<--->
+
+### WebClient
+
+* reaktive Client für http-Aufrufe
+
+* kann auch in nicht reaktiven Spring-Umfeld eingesetzt werden
+
+<-->
+
+### WebClient - Konfiguration
+
+
+<pre><code data-trim data-noescape>
+@Bean
+public WebClient webClient() {
+  WebClient webClient = WebClient
+      .builder()
+      .defaultHeader("SOME_HEADER", "SOME_VALUE")
+      .filter((clientRequest, exchangeFunction) -> {
+        // do something...
+      })
+      .build();
+}
+</code></pre>
+
+<-->
+
+### WebClient - Request
+
+<pre><code data-trim data-noescape>
+ webClient.get()
+        .uri(new URI("http://..."))
+        .header("SOME_HEADER2", "value")
+        .exchange()
+        .map(response -> response.bodyToMono(String.class))
+        .retry(2)
+        .onErrorReturn(Mono.just("not found"));
+</code></pre>
 
 <--->
 
